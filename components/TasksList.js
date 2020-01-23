@@ -3,7 +3,7 @@ import { FlatList, Text, View, StyleSheet } from 'react-native'
 import { TasksContext } from '../context/TasksContext'
 import ListItem from './ListItem';
 export default () => {
-  const { tasks } = useContext(TasksContext)
+  const { tasks, addTask } = useContext(TasksContext)
   return(
     <View style={styles.wrapper}>
       <FlatList
