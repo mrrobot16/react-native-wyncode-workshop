@@ -1,15 +1,44 @@
-import React from 'react'
-import { Text, View, Button, StyleSheet } from 'react-native'
- 
+import React, { useContext } from 'react'
+import { Text, View, Button, StyleSheet, Alert } from 'react-native'
+import { TasksContext } from '../context/TasksContext'
+
 export default props => {
+  const { flipTask, deleteTask } = useContext(TasksContext)
   return(
     <View style={styles.listItem}>
       <View style={styles.textWrapper}>
-        <Text>{props.description}</Text>
+        <Text style={ [props.completed && styles.completed] }>
+          {props.description}
+        </Text>
       </View>
       <View style={styles.buttonsWrapper}>
-        <Button title="🔲" color="white" />
-        <Button title="❌" color="white" />
+        <Button 
+          title={ props.completed ? "✅" : "🔲" }
+          color="white" 
+          onPress={ () => flipTask(props.id)}
+        />
+        <Button 
+          title="❌" 
+          color="white" 
+          onPress={ () => {
+            Alert.alert(
+              'Are you sure?',
+              'This action cannot be undone onces done :/',
+              [
+                {
+                  text: 'Cancel',
+                  onPress: () => { console.log('Cancel Pressed') },
+                  style: 'cancel'
+                },
+                {
+                  text: 'OK',
+                  onPress: () => deleteTask(props.id)
+                }
+              ],
+              { cancelable: false }
+            )
+          }}
+        />
       </View>
     </View>
   )
@@ -29,5 +58,9 @@ const styles = StyleSheet.create({
   buttonsWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  completed: {
+    textDecorationLine: 'line-through'
   }
+  
 })
