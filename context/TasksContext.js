@@ -1,14 +1,10 @@
-import React, { createContext, useState } from 'react'
+import React, { createContext, useState, useEffect } from 'react'
 import { AsyncStorage } from 'react-native'
-const dummyTasks  = [
-  { description: 'Learn React Native', id: '1'},  
-  { description: 'Learn React Context', id: '2'}
-]
 
 export const TasksContext = createContext()
  
 export const TasksContextProvider = ({ children }) => {
-  const [tasks, setTasks] = useState(dummyTasks)
+  const [tasks, setTasks] = useState([])
   const getTasks = async () => {
     try {
       let storedTasks = await AsyncStorage.getItem('TASKS');
@@ -18,23 +14,54 @@ export const TasksContextProvider = ({ children }) => {
       console.error(error);
     }
   }
-  const addTask = description => {
-    const newTask = {
-      description,
-      completed: false,
-      id: String(Number(new Date()))
+  
+  const effect = () => {
+    const fetchTasks = async () => {
+      setTasks(await getTasks())
     }
-    setTasks([newTask, ...tasks])
+    fetchTasks()
   }
-  const flipTask = taskId => {
-    const index = tasks.findIndex(task => task.id === taskId)
-    const newTasks = [...tasks]
-    newTasks[index].completed = !newTasks[index].completed
-    setTasks(newTasks)
+  useEffect(effect, [])
+  
+  const addTask = async description => {
+    try {
+      const storedTasks = await getTasks()
+      const newTask = {
+        description,
+        completed: false,
+        id: String(Number(new Date()))
+      }
+      storedTasks.unshift(newTask)
+      await AsyncStorage.setItem('TASKS', JSON.stringify(storedTasks))
+      setTasks(storedTasks)
+    } catch (error) {
+      console.error(error)
+    }
   }
-  const deleteTask = taskId => {
-     setTasks(tasks.filter(task => task.id !== taskId))
-   }
+  
+  const flipTask = async taskId => {
+    try {
+      let storedTasks = await getTasks()
+      const index = storedTasks.findIndex(task => task.id === taskId)
+      storedTasks[index].completed = !storedTasks[index].completed
+      await AsyncStorage.setItem('TASKS', JSON.stringify(storedTasks))
+      setTasks(storedTasks)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  
+  const deleteTask = async taskId => {
+    try {
+      let storedTasks = await getTasks()
+      storedTasks = storedTasks.filter(task => task.id !== taskId)
+      await AsyncStorage.setItem('TASKS', JSON.stringify(storedTasks))
+      setTasks(storedTasks)  
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  
   return(
     <TasksContext.Provider value={{ tasks, addTask, flipTask, deleteTask }}>
       { children }

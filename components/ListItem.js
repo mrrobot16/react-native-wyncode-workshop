@@ -15,7 +15,7 @@ export default props => {
         <Button 
           title={ props.completed ? "✅" : "🔲" }
           color="white" 
-          onPress={ () => flipTask(props.id)}
+          onPress={ async () => await flipTask(props.id)}
         />
         <Button 
           title="❌" 
@@ -32,7 +32,7 @@ export default props => {
                 },
                 {
                   text: 'OK',
-                  onPress: () => deleteTask(props.id)
+                  onPress: async () => await deleteTask(props.id)
                 }
               ],
               { cancelable: false }
